@@ -3,7 +3,6 @@
   "sourceTargetRevision": "HEAD",
   "sourceChart": "",
   "sourcePath": "",
-  "destinationNamespace": "demo",
   "syncPolicy": {
     "syncOptions": {
       "ServerSideApply": true,
