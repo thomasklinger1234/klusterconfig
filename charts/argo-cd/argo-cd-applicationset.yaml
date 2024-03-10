@@ -13,7 +13,7 @@ spec:
           # Get all clusters
           - clusters: {}
           - git:
-              repoURL: https://thomasklinger1234/klusterconfig.git
+              repoURL: https://github.com/thomasklinger1234/klusterconfig.git
               revision: HEAD
               files:
                 # Find all .argocd.json
@@ -34,12 +34,12 @@ spec:
       sources:
         # First source is for value files
         # Default revision is HEAD but can be overriden with clusters.${name}.valuesRevision
-        - repoURL: https://thomasklinger1234/klusterconfig.git
+        - repoURL: https://github.com/thomasklinger1234/klusterconfig.git
           targetRevision: '{{ dig "clusters" .name "valuesRevision" "HEAD" . }}'
           ref: values
         # Second source is for chart
         # Default revision is .source.targetRevision but can be overriden with clusters.${name}.chartRevision
-        - repoURL: https://thomasklinger1234/klusterconfig.git
+        - repoURL: https://github.com/thomasklinger1234/klusterconfig.git
           targetRevision: '{{ dig "clusters" .name "sourceTargetRevision" .sourceTargetRevision . }}'
           chart: '{{ default "" .sourceChart }}'
           path: '{{ default "" .sourcePath }}'
