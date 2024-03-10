@@ -6,6 +6,7 @@ metadata:
   namespace: argocd
 spec:
   goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
   generators:
     # Create a matrix generator that will install all chart in all clusters
     - matrix:
@@ -28,7 +29,9 @@ spec:
                 enabled: "true"
   template:
     metadata:
-      name: '{{ .path.basename }}'
+      name: '{{ .path.basename }}-{{ .name }}'
+      labels:
+        environment: '{{ .name }}'
     spec:
       project: default
       sources:
@@ -48,7 +51,7 @@ spec:
               - $values/{{ .path.path }}/values.yaml
               - $values/{{ .path.path }}/values.{{ .name }}.yaml
       destination:
-        server: https://kubernetes.default.svc
+        server: '{{ .server }}'
         namespace: '{{ dig "clusters" .name "destinationNamespace" .destinationNamespace . }}'
       syncPolicy:
         automated:
