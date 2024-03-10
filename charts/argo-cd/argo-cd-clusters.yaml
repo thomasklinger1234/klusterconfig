@@ -1,0 +1,33 @@
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: argo-cd-cluster-prod
+  labels:
+    argocd.argoproj.io/secret-type: cluster
+type: Opaque
+stringData:
+  name: "prod"
+  server: "https://mycluster.dev.company.com"
+  config: |
+    # Basic authentication settings
+    username: string
+    password: string
+    # Bearer authentication settings
+    bearerToken: string
+    # IAM authentication configuration
+    awsAuthConfig:
+      clusterName: string
+      roleARN: string
+    # Configure external command to supply client credentials
+    # See https://godoc.org/k8s.io/client-go/tools/clientcmd/api#ExecConfig
+    execProviderConfig:
+      command: string
+      args: [
+        string
+      ]
+      env: {
+        key: value
+      }
+      apiVersion: string
+      installHint: string

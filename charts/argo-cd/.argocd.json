@@ -1,0 +1,18 @@
+{
+  "sourceRepoURL": "",
+  "sourceTargetRevision": "HEAD",
+  "sourceChart": "",
+  "sourcePath": "",
+  "destinationNamespace": "argo-cd",
+  "syncPolicy": {
+    "syncOptions": {
+      "ServerSideApply": true,
+      "CreateNamespace": true
+    }
+  },
+  "clusters": {
+    "prod": {
+      "enabled": false
+    }
+  }
+}

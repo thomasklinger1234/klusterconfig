@@ -1,0 +1,58 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: base
+  namespace: argocd
+spec:
+  goTemplate: true
+  generators:
+    # Create a matrix generator that will install all chart in all clusters
+    - matrix:
+        generators:
+          # Get all clusters
+          - clusters: {}
+          - git:
+              repoURL: https://thomasklinger1234/klusterconfig.git
+              revision: HEAD
+              files:
+                # Find all .argocd.json
+                - path: 'charts/**/.argocd.json'
+              values:
+                # Add enabled field if clusters.${name}.enabled = true
+                # name comes from the cluster generator
+                enabled: '{{ dig "clusters" .name "enabled" false . }}'
+            selector:
+              matchLabels:
+                # Keep only the one which field enabled=true
+                enabled: "true"
+  template:
+    metadata:
+      name: '{{ .path.basename }}'
+    spec:
+      project: platform
+      sources:
+        # First source is for value files
+        # Default revision is HEAD but can be overriden with clusters.${name}.valuesRevision
+        - repoURL: https://thomasklinger1234/klusterconfig.git
+          targetRevision: '{{ dig "clusters" .name "valuesRevision" "HEAD" . }}'
+          ref: values
+        # Second source is for chart
+        # Default revision is .source.targetRevision but can be overriden with clusters.${name}.chartRevision
+        - repoURL: https://thomasklinger1234/klusterconfig.git
+          targetRevision: '{{ dig "clusters" .name "sourceTargetRevision" .sourceTargetRevision . }}'
+          chart: '{{ default "" .sourceChart }}'
+          path: '{{ default "" .sourcePath }}'
+          helm:
+            valueFiles:
+              - $values/{{ .path.path }}/values.yaml
+              - $values/{{ .path.path }}/values.{{ .name }}.yaml
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{ dig "clusters" .name "destinationNamespace" .destinationNamespace . }}'
+      syncPolicy:
+        automated:
+          prune: true
+        syncOptions:
+          - ServerSideApply={{ dig "syncPolicy" "syncOptions" "ServerSideApply" "true" . }}
+          - CreateNamespace={{ dig "syncPolicy" "syncOptions" "ServerSideApply" "true" . }}
