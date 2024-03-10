@@ -12,7 +12,10 @@ spec:
     - matrix:
         generators:
           # Get all clusters
-          - clusters: {}
+          - clusters:
+              selector:
+                matchLabels:
+                  argocd.argoproj.io/secret-type: cluster
           - git:
               repoURL: https://github.com/thomasklinger1234/klusterconfig.git
               revision: HEAD
@@ -22,16 +25,24 @@ spec:
               values:
                 # Add enabled field if clusters.${name}.enabled = true
                 # name comes from the cluster generator
-                enabled: '{{ dig "clusters" .name "enabled" false . }}'
+                enabled: '{{ dig "clusters" "prod" "enabled" false . }}'
+                data: "{{ . }}"
             selector:
               matchLabels:
-                # Keep only the one which field enabled=true
                 enabled: "true"
+
+#              matchExpressions:
+#                - key: "clusters.prod.enabled"
+#                  operator: In
+#                  values:
+#                    - "true"
   template:
     metadata:
-      name: '{{ .path.basename }}-{{ .name }}'
+      name: '{{ .name }}-{{ .path.basename }}'
       labels:
         environment: '{{ .name }}'
+      annotations:
+        notifications.argoproj.io/subscribe.on-sync-succeeded.slack: deployments
     spec:
       project: default
       sources:
@@ -45,8 +56,9 @@ spec:
         - repoURL: https://github.com/thomasklinger1234/klusterconfig.git
           targetRevision: '{{ dig "clusters" .name "sourceTargetRevision" .sourceTargetRevision . }}'
           chart: '{{ default "" .sourceChart }}'
-          path: '{{ default "" .sourcePath }}'
+          path: '{{ default .path.path .sourcePath }}'
           helm:
+            ignoreMissingValueFiles: true
             valueFiles:
               - $values/{{ .path.path }}/values.yaml
               - $values/{{ .path.path }}/values.{{ .name }}.yaml
@@ -59,3 +71,23 @@ spec:
         syncOptions:
           - ServerSideApply={{ dig "syncPolicy" "syncOptions" "ServerSideApply" "true" . }}
           - CreateNamespace={{ dig "syncPolicy" "syncOptions" "ServerSideApply" "true" . }}
+          - Validate=true
+          - PruneLast=false
+          - RespectIgnoreDifferences=true
+          - ApplyOutOfSyncOnly=true
+          - CreateNamespace=true
+        retry:
+          limit: 3 # number of failed sync attempt retries; unlimited number of attempts if less than 0
+          backoff:
+            duration: 5s # the amount to back off. Default unit is seconds, but could also be a duration (e.g. "2m", "1h")
+            factor: 2 # a factor to multiply the base duration after each failed retry
+            maxDuration: 5m # the maximum amount of time allowed for the backoff strategy
+
+      # Will ignore differences between live and desired states during the diff. Note that these configurations are not
+      # used during the sync process.
+      ignoreDifferences:
+        # for the specified managedFields managers
+        - group: "*"
+          kind: "*"
+          managedFieldsManagers:
+            - kube-controller-manager
