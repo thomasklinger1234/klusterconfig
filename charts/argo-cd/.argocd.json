@@ -3,7 +3,7 @@
   "sourceTargetRevision": "HEAD",
   "sourceChart": "",
   "sourcePath": "",
-  "destinationNamespace": "argo-cd",
+  "destinationNamespace": "argocd",
   "syncPolicy": {
     "syncOptions": {
       "ServerSideApply": true,
@@ -11,7 +11,7 @@
     }
   },
   "clusters": {
-    "in-cluster": {
+    "core": {
       "enabled": true
     }
   }
