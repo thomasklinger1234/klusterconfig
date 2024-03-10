@@ -11,8 +11,8 @@
     }
   },
   "clusters": {
-    "prod": {
-      "enabled": false
+    "in-cluster": {
+      "enabled": true
     }
   }
 }

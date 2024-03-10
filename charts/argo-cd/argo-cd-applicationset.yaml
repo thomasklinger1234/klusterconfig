@@ -30,7 +30,7 @@ spec:
     metadata:
       name: '{{ .path.basename }}'
     spec:
-      project: platform
+      project: default
       sources:
         # First source is for value files
         # Default revision is HEAD but can be overriden with clusters.${name}.valuesRevision
