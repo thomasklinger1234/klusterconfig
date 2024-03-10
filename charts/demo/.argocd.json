@@ -11,7 +11,7 @@
   },
   "clusters": {
     "local": {
-      "enabled": false
+      "enabled": true
     },
     "core": {
       "enabled": true,
