@@ -11,6 +11,9 @@
     }
   },
   "clusters": {
+    "local": {
+      "enabled": false
+    },
     "core": {
       "enabled": true,
       "destinationNamespace": "core"
